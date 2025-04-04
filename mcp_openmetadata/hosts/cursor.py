@@ -17,16 +17,28 @@ def get_cursor_mcp_config_path() -> Path | None:
 
 
 @click.command()
-@click.option("--env", "-e", help="Environment variables to set for the server.")
-def main(env: Optional[str] = None):
+@click.option("--editable", is_flag=True, help="Use editable mode")
+@click.option(
+    "--env", "-e", multiple=True, help="Environment variables to set for the server. Can be used multiple times."
+)
+def main(editable: bool, env: Optional[tuple[str, ...]] = None):
+    config_dir = get_cursor_mcp_config_path()
+
     server = OpenMetadataMCPServer()
 
-    config_dir = get_cursor_mcp_config_path()
+    env_dict: Optional[dict[str, str]] = None
+    if env:
+        env_dict = {}
+        for env_var in env:
+            key, value = env_var.split("=", 1)
+            env_dict[key.strip()] = value.strip()
 
     update_mcp_config(
         config_dir=config_dir,
         server_name=server.mcp.name,
-        env_vars=env,
+        with_packages=server.mcp.dependencies,
+        with_editable=Path(__file__).parent.parent.parent if editable else None,
+        env_vars=env_dict,
     )
 
 

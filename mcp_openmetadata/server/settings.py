@@ -6,34 +6,30 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # openmetadata settings
-    openmetadata_uri: str
+    uri: str
 
     # one of basic auth or jwt token should be provided
-    openmetadata_basic_username: Optional[str] = None
-    openmetadata_basic_password: Optional[str] = None
-    openmetadata_jwt_token: Optional[str] = None
+    username: Optional[str] = None
+    password: Optional[str] = None
+    jwt_token: Optional[str] = None
 
     # mcp settings
-    tools: Optional[str] = (
-        "search_entities_with_query"  # comma separated tools to mount
-    )
+    active_tools: Optional[str] = "*"  # comma separated tools to mount
 
-    model_config = SettingsConfigDict()
+    model_config = SettingsConfigDict(env_prefix="OPENMETADATA_")
 
     @model_validator(mode="after")
     def validate_auth(self):
-        if self.openmetadata_basic_username and self.openmetadata_basic_password:
+        if self.username and self.password:
             return self
-        if self.openmetadata_jwt_token:
+        if self.jwt_token:
             return self
         raise ValueError("one of basic auth or jwt token should be provided")
 
     @property
     def authorization(self) -> dict:
-        if self.openmetadata_basic_username and self.openmetadata_basic_password:
-            return {
-                "Authorization": f"Basic {self.openmetadata_basic_username}:{self.openmetadata_basic_password}"
-            }
-        if self.openmetadata_jwt_token:
-            return {"Authorization": f"Bearer {self.openmetadata_jwt_token}"}
+        if self.username and self.password:
+            return {"Authorization": f"Basic {self.username}:{self.password}"}
+        if self.jwt_token:
+            return {"Authorization": f"Bearer {self.jwt_token}"}
         raise ValueError("one of basic auth or jwt token should be provided")

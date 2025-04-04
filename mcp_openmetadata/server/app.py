@@ -11,22 +11,22 @@ class OpenMetadataMCPServer:
         self.settings = Settings()
 
         self.session = self._create_session()
-
         self.mount_tools()
 
     def _create_session(self):
-        session = httpx.Client(
-            base_url=self.settings.openmetadata_uri, headers=self.settings.authorization
-        )
+        session = httpx.Client(base_url=self.settings.uri, headers=self.settings.authorization)
         return session
 
     def mount_tools(self):
-        if self.settings.tools:
-            for tool in self.settings.tools.split(","):
-                self.mcp.mount(f"openmetadata_{tool}", getattr(tools, f"{tool}_tool"))
-
-                if hasattr(tools, tool):
+        if self.settings.active_tools:
+            if self.settings.active_tools == "*":
+                for tool in tools.__all__:
                     register_tool = getattr(tools, tool)
+                    register_tool(self.mcp, self.session)
+            else:
+                for tool in self.settings.active_tools.split(","):
+                    if hasattr(tools, tool):
+                        register_tool = getattr(tools, tool)
                     register_tool(self.mcp, self.session)
                 else:
                     raise ValueError(f"Tool {tool} not found")

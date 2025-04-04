@@ -20,10 +20,7 @@ def update_mcp_config(
         config["mcpServers"] = {}
 
     # Always preserve existing env vars and merge with new ones
-    if (
-        server_name in config["mcpServers"]
-        and "env" in config["mcpServers"][server_name]
-    ):
+    if server_name in config["mcpServers"] and "env" in config["mcpServers"][server_name]:
         existing_env = config["mcpServers"][server_name]["env"]
         if env_vars:
             # New vars take precedence over existing ones
@@ -35,7 +32,11 @@ def update_mcp_config(
     args = ["run"]
 
     # Collect all packages in a set to deduplicate
-    packages = {"fastmcp", "mcp-openmetadata"}
+    if with_editable:
+        packages = {"fastmcp"}
+    else:
+        packages = {"fastmcp", "mcp-openmetadata"}
+
     if with_packages:
         packages.update(pkg for pkg in with_packages if pkg)
 
