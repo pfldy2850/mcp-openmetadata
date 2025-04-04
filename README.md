@@ -82,11 +82,30 @@ OPENMETADATA_PASSWORD=<YOUR OPENMETADATA PASSWORD>
 ```
 
 
-## API list
+## Tool list
 mcp-openmetadata does not provide all APIs available in OpenMetadata.
 Please refer to [Supported APIs](https://github.com/pfldy2850/mcp-openmetadata/blob/main/README-API.md) for the list of available APIs.
 
 Since using the original API directly contains too much unnecessary data that is difficult to fit into the model context, we are working on returning somewhat organized results.
+
+### Search Tools
+- `search_entities_with_query`: Search entities using query text. Supports pagination and sorting. Useful for:
+  - Listing all tables/topics (q=*)
+  - Searching by field names (e.g., q=columnNames:address)
+  - Searching by tags (e.g., q=tags.tagFQN:user.email)
+  - Complex queries with AND/OR operators
+  - Filtering by service type, constraints, owners, etc.
+
+### Table Tools
+- `get_list_of_tables`: Get a paginated list of tables with basic information
+- `get_table_by_fqn`: Get detailed table information by fully qualified name
+- `get_table_columns_by_fqn`: Get table columns information by fully qualified name
+- `get_table_owners_by_fqn`: Get table ownership information by fully qualified name
+- `get_sample_data`: Get sample data from a specified table
+
+Each tool returns optimized responses with relevant fields to ensure compatibility with model context limits while providing essential metadata information.
+
+
 
 
 ## License
